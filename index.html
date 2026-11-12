@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>予定と時間 プリント</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&display=swap" rel="stylesheet">
+<style id="pageCss">
+.page{width:210mm;height:297mm;padding:5mm 5mm 5mm 15mm;box-sizing:border-box;background:#fff;color:#000;font-family:'BIZ UDPGothic',sans-serif;font-size:12pt;line-height:var(--lh,2);overflow:hidden;position:relative}
+.page *{box-sizing:border-box}
+.sheet{height:100%;overflow:hidden;padding-right:0.6mm}
+.page rt{font-size:6pt;font-weight:400}
+.nm{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:var(--nm,7mm)}
+.nm .no{font-size:12pt}
+.nm .nr{display:flex;align-items:flex-end;gap:2mm}
+.nm .line{display:inline-block;width:70mm;height:9mm;border-bottom:0.3mm solid #000}
+.lead{margin:0 0 2mm}
+.tw{display:flex;gap:5mm;align-items:flex-start}
+.tw>div{min-width:0}
+.cap{font-weight:700;margin-top:2mm;margin-bottom:0.5mm}
+table.tb{border-collapse:collapse;width:100%;table-layout:fixed;line-height:1.55}
+.tb th,.tb td{border:0.3mm solid #000;padding:var(--cp,1.3mm) 0.5mm;text-align:center;font-weight:400;vertical-align:middle}
+.tb th{background:#e4e4e4}
+.tb td.l{text-align:left;padding-left:2.5mm}
+table.cal td{height:var(--ch,12mm);vertical-align:top;text-align:left;padding:0.4mm 1mm;line-height:1.3}
+.cal .dn{display:block;font-size:11pt}
+.cal .ev{display:block;text-align:center;font-size:10pt;line-height:1.75;white-space:nowrap}
+.cal .ev rt{font-size:5pt}
+table.cal.plain td{height:var(--chp,8.5mm);text-align:center;vertical-align:middle;padding:0}
+.cal.plain .dn{display:inline}
+.cal.plain .ev{font-size:8.5pt;line-height:1.5}
+.cal td.off{background:#f1f1f1}
+.note{border:0.3mm solid #000;margin-top:2.5mm;padding:0.8mm 2.5mm}
+.note .nh{font-weight:700}
+.note .ni{padding-left:1em;text-indent:-1em}
+.q{margin-top:var(--gap,3mm)}
+.qt{padding-left:3em;text-indent:-3em}
+.bl{white-space:nowrap}
+.opts{display:flex;flex-wrap:wrap;gap:0.8mm 9mm;padding-left:3em;margin-top:0.5mm}
+.opts.col{flex-direction:column}
+.clocks{display:flex;gap:14mm;padding-left:3em;margin-top:1mm}
+.clocks .g{width:var(--gh,30mm);text-align:center;line-height:1.6}
+.clocks svg{display:block;width:100%;height:auto}
+.ansp h2{font-size:14pt;margin:2mm 0 3mm}
+.ansp .al{margin-top:4mm;padding-left:3em;text-indent:-3em}
+.ansp .al b{font-weight:700}
+.ansp .why{display:block;text-indent:0}
+@media print{
+  @page{size:A4;margin:5mm 5mm 5mm 15mm}
+  html,body{margin:0;padding:0;background:#fff}
+  .page{width:auto;height:286mm;padding:0;margin:0;box-shadow:none;break-after:page;page-break-after:always}
+  .page:last-child{break-after:auto;page-break-after:auto}
+  .noprint{display:none!important}
+}
+</style>
+<style>
+html,body{height:100%;margin:0}
+body{font-family:'BIZ UDPGothic',sans-serif;background:#eef4f7;color:#223;overflow:hidden;touch-action:manipulation;-webkit-user-select:none;user-select:none;-webkit-text-size-adjust:100%;display:flex;flex-direction:column}
+rt{font-size:.5em}
+header{background:#fff;border-bottom:2px solid #9cc7d8;padding:4px 10px 5px;flex:none}
+.top{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+h1{font-size:17px;margin:0 auto 0 0;line-height:1.7}
+button{font-family:inherit;font-size:14px;min-height:36px;min-width:36px;padding:0 11px;border-radius:7px;border:2px solid #4a90a8;background:#fff;color:#1d4f60;line-height:1.7;cursor:pointer;touch-action:manipulation}
+button.main{background:#2f7f99;color:#fff;border-color:#2f7f99}
+button.on{background:#d5edf5;border-color:#2f7f99;font-weight:700}
+#panel{margin-top:4px;display:grid;gap:3px}
+#panel.hide{display:none}
+.row{display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+.row>.lb{font-weight:700;font-size:13px;line-height:1.7;margin-right:1px}
+.row>.lb:not(:first-child){margin-left:8px}
+.stp{display:flex;align-items:center;gap:3px}
+.stp input{width:46px;height:36px;box-sizing:border-box;font-size:17px;text-align:center;border:2px solid #4a90a8;border-radius:7px;font-family:inherit;padding:0;-webkit-user-select:text;user-select:text}
+.sub{font-size:12px;color:#456;line-height:1.7}
+#msg{font-size:13px;color:#1d4f60;line-height:1.7;font-weight:700}
+#msg:empty{display:none}
+#pv{flex:1;overflow:auto;-webkit-overflow-scrolling:touch;padding:8px 8px 40px}
+#scaler{transform-origin:0 0}
+#pages .page{margin:0 0 6mm;box-shadow:0 1px 6px rgba(0,0,0,.25)}
+#pages [contenteditable]{-webkit-user-select:text;user-select:text;outline:none}
+#pages [contenteditable]:focus{background:#fff6c9}
+.warn{position:absolute;left:15mm;right:5mm;bottom:2mm;background:#fff;border:0.6mm solid #b35b00;color:#7a3e00;padding:1mm 2mm;font-size:11pt;line-height:1.9}
+@media print{
+  html,body{height:auto!important;overflow:visible!important;background:#fff}
+  body{display:block}
+  header{display:none!important}
+  #pv{overflow:visible;padding:0;flex:none}
+  #pvh{height:auto!important}
+  #scaler{transform:none!important;width:auto!important;margin:0!important}
+  #pages .page{margin:0;box-shadow:none;width:auto;height:286mm;padding:0}
+  #pages [contenteditable]:focus{background:none}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="top">
+    <h1 data-r="{予定|よてい}と{時間|じかん} プリント"></h1>
+    <button id="bSet" data-r="{設定|せってい}"></button>
+    <button id="bNew" class="main" data-r="{新|あたら}しい{問題|もんだい}"></button>
+    <button id="bPrint" class="main" data-r="{印刷|いんさつ}する"></button>
+    <button id="bCopy" data-r="HTMLをコピー"></button>
+  </div>
+  <div id="panel">
+    <div class="row"><span class="lb">ジャンル</span><span id="gGenre" class="row"></span></div>
+    <div class="row">
+      <span class="lb">レベル</span><span class="stp" id="sLevel"></span>
+      <span class="lb" data-r="まい{数|すう}"></span><span class="stp" id="sCount"></span>
+      <span class="lb" data-r="{答|こた}え"></span><span id="gAns" class="row"></span>
+    </div>
+    <div class="sub" data-r="レベル 1：やさしい　2：ふつう　3：むずかしい　／　プリントの{文字|もじ}や{数字|すうじ}はタップして{直|なお}せます（{時計|とけい}と{答|こた}えは{変|か}わりません）"></div>
+  </div>
+  <div id="msg"></div>
+</header>
+<div id="pv"><div id="pvh"><div id="scaler"><div id="pages"></div></div></div></div>
+
+<script>
+/*GEN-START*/
+// ===== 問題を作る部分（画面や印刷とは分けてあるので、ほかのアプリにそのまま写せる） =====
+var rnd=Math.random;
+function ri(a,b){return a+Math.floor(rnd()*(b-a+1));}
+function pick(a){return a[ri(0,a.length-1)];}
+function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=ri(0,i);var t=a[i];a[i]=a[j];a[j]=t;}return a;}
+function umax(a){var m=Math.max.apply(null,a);return a.filter(function(v){return v===m;}).length===1?a.indexOf(m):-1;}
+function sum(a){return a.reduce(function(x,y){return x+y;},0);}
+function bl(pre,post,n){return pre+'（'+'　'.repeat(n||4)+'）'+post;}
+function mult(lo,hi,st){var a=[];for(var v=Math.ceil(lo/st)*st;v<=hi;v+=st)a.push(v);return a;}
+var SEL='1つ{選|えら}び、（　）に○を{書|か}いてください。';
+var TAIL='を{見|み}て、（1）〜（4）の{問題|もんだい}に{答|こた}えてください。';
+var OSH='【お{知|し}らせ】';
+var NAMES=['ゆうた','みさき','けんじ','さくら','はると','あおい','そうた','ひなた'];
+var WD=['{日|にち}','{月|げつ}','{火|か}','{水|すい}','{木|もく}','{金|きん}','{土|ど}'];
+var YO=['{日曜日|にちようび}','{月曜日|げつようび}','{火曜日|かようび}','{水曜日|すいようび}','{木曜日|もくようび}','{金曜日|きんようび}','{土曜日|どようび}'];
+var CN=['①','②','③','④','⑤'];
+var JK='{時刻|じこく}',JIK='{時間|じかん}',KAI='{回目|かいめ}';
+var DORE='どれだけですか。';
+
+// ---- 時刻・時間の書き方（「7時5分」「7時」。分を0でうめない） ----
+var bad=false; // 昼の12時台は「午後0時」になって分かりにくいので、出てきたら作り直す
+function hm(m){var h=Math.floor(m/60),mm=m%60;return (h>12?h-12:h)+'時'+(mm?mm+'分':'');}
+function T(m){var h=Math.floor(m/60);if(h===12||h<1||h>23)bad=true;return (h<12?'{午前|ごぜん}':'{午後|ごご}')+hm(m);}
+function D(d){var h=Math.floor(d/60),m=d%60;return (h?h+JIK:'')+(m?m+'分':'');}
+
+// ---- 時計（SVG・白黒） ----
+function clockSVG(ha,ma){
+  var s='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" font-family="\'BIZ UDPGothic\',sans-serif" fill="#000">';
+  s+='<circle cx="50" cy="50" r="47.5" fill="#fff" stroke="#000" stroke-width="2"/>';
+  function ln(a,r1,r2,w){a=a*Math.PI/180;var sx=Math.sin(a),cy=Math.cos(a);
+    return '<line x1="'+(50+r1*sx).toFixed(1)+'" y1="'+(50-r1*cy).toFixed(1)+'" x2="'+(50+r2*sx).toFixed(1)+'" y2="'+(50-r2*cy).toFixed(1)+'" stroke="#000" stroke-width="'+w+'" stroke-linecap="round"/>';}
+  for(var i=0;i<60;i++)s+=ln(i*6,i%5?44.2:42,46.5,i%5?0.5:1.4);
+  for(var n=1;n<=12;n++){var a=n*30*Math.PI/180;s+='<text x="'+(50+34.5*Math.sin(a)).toFixed(1)+'" y="'+(50-34.5*Math.cos(a)+3.9).toFixed(1)+'" font-size="10.5" text-anchor="middle">'+n+'</text>';}
+  s+=ln(ha,0,21,3.4)+ln(ma,0,37,1.8)+'<circle cx="50" cy="50" r="2.4"/>';
+  return s+'</svg>';
+}
+function clockAt(m){return clockSVG(((m/60)%12)*30,(m%60)*6);}
+// 正しい時計1つと、まちがいの時計2つ（長針と短針が反対・1時間ずれ・数分ずれ）
+function clockQ(m,L){
+  var w1=clockAt(m+((m%60)>=30?60:-60)),ha=((m/60)%12)*30,ma=(m%60)*6,df=Math.abs(ha-ma)%360,w2;if(df>180)df=360-df;
+  if(L===1&&df>=30)w2=clockSVG(ma,ha);else w2=clockAt(m+(rnd()<0.5?1:-1)*(L===3?5:L===2?10:15));
+  var vs=shuffle([{s:clockAt(m),ok:true},{s:w1},{s:w2}]),pos=0;vs.forEach(function(x,k){if(x.ok)pos=k;});
+  return {svgs:vs.map(function(x){return x.s;}),ans:'{左|ひだり}から'+(pos+1)+'{番目|ばんめ}の{時計|とけい}'};
+}
+// 正しい文1つと、まちがいの文2つを組み合わせる
+function statements(cands){
+  var tr=cands.filter(function(c){return c&&c.T;});if(!tr.length)return null;
+  var t=pick(tr),fs=shuffle(cands.filter(function(c){return c&&c!==t&&c.F;})).slice(0,2);if(fs.length<2)return null;
+  var list=shuffle([{s:t.T,ok:true},{s:fs[0].F},{s:fs[1].F}]),pos=0;list.forEach(function(x,k){if(x.ok)pos=k;});
+  return {opts:list.map(function(x){return x.s;}),pos:pos};
+}
+function stQ(qs,ans,st,what){
+  qs.push({t:what+'から{分|わ}かることとして、{正|ただ}しいものを'+SEL,opts:st.opts,col:true});
+  ans.push({a:'{上|うえ}から'+(st.pos+1)+'{番目|ばんめ}',w:''});
+}
+// ---- カレンダー（年は決めず、月の日数と1日の曜日だけ決める） ----
+function mkCal(){
+  var M=pick([[5,31],[6,30],[9,30],[10,31],[11,30]]),c={mo:M[0],nd:M[1],fw:ri(0,6)};
+  c.wd=function(d){return (c.fw+d-1)%7;};
+  c.nth=function(d){return Math.ceil(d/7);};
+  c.days=function(f){var a=[];for(var d=1;d<=c.nd;d++)if(f(d))a.push(d);return a;};
+  return c;
+}
+function calTable(c,cap,lab,plain,w){
+  var rows=[],row=[],i;for(i=0;i<c.fw;i++)row.push(null);
+  for(var d=1;d<=c.nd;d++){row.push({d:d,e:lab[d]||''});if(row.length===7){rows.push(row);row=[];}}
+  if(row.length){while(row.length<7)row.push(null);rows.push(row);}
+  return {cal:true,plain:!!plain,cap:cap,head:WD,rows:rows,w:w||1};
+}
+function dl(a){return a.map(function(d){return d+'日';}).join('、');}
+
+// ---- ジャンル1：校外学習のスケジュール ----
+var TRIPS=[
+  {pl:'{動物園|どうぶつえん}',a1:'{動物|どうぶつ}の{見学|けんがく}',a2:'えさやり{体験|たいけん}',sun:'しばふ{広場|ひろば}',rain:'{休|きゅう}けい{室|しつ}'},
+  {pl:'{科学館|かがくかん}',a1:'{展示|てんじ}の{見学|けんがく}',a2:'{実験|じっけん}{教室|きょうしつ}',sun:'{中庭|なかにわ}',rain:'{食堂|しょくどう}'},
+  {pl:'{牧場|ぼくじょう}',a1:'{牛|うし}の{見学|けんがく}',a2:'バター{作|づく}り',sun:'{丘|おか}の{広場|ひろば}',rain:'{体験館|たいけんかん}'}];
+function genKogai(L){
+  var th=pick(TRIPS),st=L===1?10:5,GK='{学校|がっこう}',SH='{出発|しゅっぱつ}',HIRU='{昼|ひる}ごはん',LUN=HIRU+'と{休|きゅう}けい';
+  function r(a,b){return pick(mult(a,b,st));}
+  var dep=r(520,550),ride1=r(40,75),arr=dep+ride1,s1=arr+r(5,15),lun=r(680,710),pm=780+r(0,20),e2=pm+r(50,90),dep2=e2+r(10,20),ride2=ride1+st*ri(-2,2),back=dep2+ride2;
+  var d1=lun-s1,d2=e2-pm,dlun=pm-lun,total=back-dep;if(d1<40)return null;
+  var rows=[[T(dep),GK+'をバスで'+SH],[T(arr),th.pl+'に{着|つ}く'],[T(s1)+'〜'+T(lun),th.a1],[T(lun)+'〜'+T(pm),LUN+'（'+th.sun+'）'],[T(pm)+'〜'+T(e2),th.a2],[T(dep2),th.pl+'をバスで'+SH],[T(back),GK+'に{着|つ}く']];
+  var notes=['{雨|あめ}の日は、'+HIRU+'を'+th.rain+'で{食|た}べます。'],mt=pick([10,15,20]),late=pick([15,20,25]),qs=[],ans=[];
+  if(L>=2)notes.push(SH+'の'+mt+'分{前|まえ}に、'+GK+'の{玄関|げんかん}に{集合|しゅうごう}します。');
+  if(L===3)notes.push('{帰|かえ}りの{道|みち}がこんでいると、'+GK+'に{着|つ}くのが'+late+'分おそくなります。');
+  var du={ride1:{t:GK+'を'+SH+'してから、'+th.pl+'に{着|つ}くまでの'+JIK+'は、'+DORE,d:ride1,w:T(dep)+'から'+T(arr)+'まで'},
+    a1:{t:'「'+th.a1+'」の'+JIK+'は、'+DORE,d:d1,w:T(s1)+'から'+T(lun)+'まで'},
+    a2:{t:'「'+th.a2+'」の'+JIK+'は、'+DORE,d:d2,w:T(pm)+'から'+T(e2)+'まで'},
+    ride2:{t:th.pl+'を'+SH+'してから、'+GK+'に{着|つ}くまでの'+JIK+'は、'+DORE,d:ride2,w:T(dep2)+'から'+T(back)+'まで'},
+    lun:{t:'「'+LUN+'」の'+JIK+'は、'+DORE,d:dlun,w:T(lun)+'から'+T(pm)+'まで'},
+    total:{t:GK+'を'+SH+'してから、'+GK+'に{帰|かえ}ってくるまでの'+JIK+'は、'+DORE,d:total,w:T(dep)+'から'+T(back)+'まで'}};
+  var x=du[pick(L===1?['ride1','a1','a2']:L===2?['ride1','a1','a2','ride2']:['lun','a1','ride2'])];
+  qs.push({t:x.t,a:bl('','',7)});ans.push({a:D(x.d),w:x.w});
+  var cq;
+  if(L===1){var ev=pick([[dep,GK+'を'+SH+'する'],[arr,th.pl+'に{着|つ}く'],[dep2,th.pl+'を'+SH+'する']]);cq=clockQ(ev[0],L);
+    qs.push({t:ev[1]+JK+'を{表|あらわ}している{時計|とけい}を'+SEL,clocks:cq.svgs});ans.push({a:cq.ans,w:T(ev[0])});}
+  else{cq=clockQ(dep-mt,L);
+    qs.push({t:GK+'の{玄関|げんかん}に{集合|しゅうごう}する'+JK+'を{表|あらわ}している{時計|とけい}を'+SEL,clocks:cq.svgs});ans.push({a:cq.ans,w:T(dep)+'の'+mt+'分{前|まえ}なので、'+T(dep-mt)});}
+  if(L===1){qs.push({t:'{雨|あめ}がふりました。'+HIRU+'は、どこで{食|た}べますか。',a:bl('','',7)});ans.push({a:th.rain,w:OSH+'を{見|み}ます'});}
+  else if(L===2){x=du.total;qs.push({t:x.t,a:bl('','',7)});ans.push({a:D(x.d),w:x.w});}
+  else{qs.push({t:'{帰|かえ}りの{道|みち}がこんでいました。'+GK+'に{着|つ}いたのは、{何時|なんじ}{何|なん}分ですか。',a:bl('','',8)});ans.push({a:T(back+late),w:T(back)+'の'+late+'分{後|あと}'});}
+  if(L===1){var acts=[[s1,lun,th.a1],[lun,pm,LUN],[pm,e2,th.a2]],k=ri(0,2),ts=mult(acts[k][0]+10,acts[k][1]-10,30).filter(function(t){return t<720||t>=780;});if(!ts.length)return null;var t0=pick(ts);
+    qs.push({t:T(t0)+'には、{何|なに}をしていますか。'+SEL,opts:acts.map(function(a){return a[2];})});ans.push({a:acts[k][2],w:T(acts[k][0])+'から'+T(acts[k][1])+'までの{間|あいだ}'});}
+  else{var s1t='「'+th.a1+'」の'+JIK+'は、「'+th.a2+'」の'+JIK+'より{長|なが}い。',s2t='{行|い}きより{帰|かえ}りの{方|ほう}が、バスに{乗|の}っている'+JIK+'が{長|なが}い。',s4t='「'+LUN+'」の'+JIK+'は、1'+JIK+'30分より{長|なが}い。';
+    var stt=statements([d1===d2?null:(d1>d2?{T:s1t}:{F:s1t}),ride1===ride2?null:(ride2>ride1?{T:s2t}:{F:s2t}),
+      {T:'{雨|あめ}の日は、'+HIRU+'を'+th.rain+'で{食|た}べる。',F:'{雨|あめ}の日も、'+HIRU+'を'+th.sun+'で{食|た}べる。'},
+      dlun===90?null:(dlun>90?{T:s4t}:{F:s4t}),
+      {T:GK+'の{玄関|げんかん}に{集合|しゅうごう}するのは、'+T(dep-mt)+'だ。',F:GK+'の{玄関|げんかん}に{集合|しゅうごう}するのは、'+T(dep+mt)+'だ。'}]);
+    if(!stt)return null;stQ(qs,ans,stt,'{表|ひょう}と'+OSH);}
+  return {genre:'{校外学習|こうがいがくしゅう}',lead:pick(NAMES)+'さんの{学年|がくねん}は、{校外学習|こうがいがくしゅう}で'+th.pl+'に{行|い}きます。{次|つぎ}の{表|ひょう}は、その日のスケジュールです。{表|ひょう}と'+OSH+TAIL,
+    tables:[{cap:'【{校外学習|こうがいがくしゅう}のスケジュール】',lbw:92,left:true,head:[JK,'すること'],rows:rows}],notes:notes,qs:qs,ans:ans};
+}
+
+// ---- ジャンル2：月の行事予定（カレンダー） ----
+var EVN=['{遠足|えんそく}','{身体測定|しんたいそくてい}','{避難訓練|ひなんくんれん}','{参観日|さんかんび}','{音楽会|おんがくかい}','{大|おお}そうじ','{写生会|しゃせいかい}','テスト','{委員会|いいんかい}'];
+var TEN=['{作品展|さくひんてん}','ポスター{展|てん}','{本|ほん}の{展示|てんじ}'];
+function genGyoji(L){
+  var c=mkCal(),mo=c.mo,GK='{学校|がっこう}',YS='{休|やす}み',GY='{行事|ぎょうじ}',ZEN='{全部|ぜんぶ}で';
+  var sch=c.days(function(d){var w=c.wd(d);return w>=1&&w<=5;}),free=shuffle(sch),nh=L===1?0:L===2?1:2,hol=free.slice(0,nh).sort(function(a,b){return a-b;}),lab={},evs=[];
+  hol.forEach(function(d){lab[d]=YS;});
+  shuffle(EVN).slice(0,L===1?4:5).forEach(function(nm,i){var d=free[nh+i];lab[d]=nm;evs.push({d:d,nm:nm});});
+  evs.sort(function(a,b){return a.d-b.d;});
+  var cw=pick([2,3,4]),clubAll=c.days(function(d){return c.wd(d)===cw;}),club=L===1?clubAll:clubAll.filter(function(d){return !lab[d];});
+  if(L>=2&&club.length===clubAll.length)return null;
+  var wkend=c.days(function(d){var w=c.wd(d);return w===0||w===6;}).length,open=sch.filter(function(d){return hol.indexOf(d)<0;});
+  var notes=[YO[6]+'と'+YO[0]+'は、'+GK+'が'+YS+'です。'+(L>=2?'「'+YS+'」と{書|か}いてある日も、'+GK+'が'+YS+'です。':''),
+    'クラブは、{毎週|まいしゅう}'+YO[cw]+'にあります。'+(L>=2?'ただし、'+GY+'がある日と、'+GK+'が'+YS+'の日は、クラブはありません。':'')];
+  var qs=[],ans=[],e=pick(evs),dai=function(d){return '{第|だい}'+c.nth(d)+YO[c.wd(d)];};
+  if(L===1){qs.push({t:e.nm+'は、{何曜日|なんようび}ですか。',a:bl('','{曜日|ようび}',3)});ans.push({a:YO[c.wd(e.d)],w:mo+'月'+e.d+'日'});}
+  else{qs.push({t:'この月の'+dai(e.d)+'にある'+GY+'は、{何|なん}ですか。',a:bl('','',7)});ans.push({a:e.nm,w:dai(e.d)+'は、'+mo+'月'+e.d+'日'});}
+  if(L===1){qs.push({t:YO[6]+'と'+YO[0]+'は、この月に{合|あ}わせて{何|なん}日ありますか。',a:bl('','日',3)});ans.push({a:wkend+'日',w:YO[6]+'が'+c.days(function(d){return c.wd(d)===6;}).length+'日、'+YO[0]+'が'+c.days(function(d){return c.wd(d)===0;}).length+'日'});}
+  else if(L===2){qs.push({t:GK+'が'+YS+'の日は、この月に'+ZEN+'{何|なん}日ありますか。',a:bl('','日',3)});ans.push({a:(wkend+nh)+'日',w:YO[6]+'と'+YO[0]+'が'+wkend+'日、「'+YS+'」の日が'+nh+'日'});}
+  else{qs.push({t:GK+'がある日は、この月に'+ZEN+'{何|なん}日ありますか。',a:bl('','日',3)});ans.push({a:open.length+'日',w:c.nd+'日から、'+YO[6]+'と'+YO[0]+'の'+wkend+'日と、「'+YS+'」の'+nh+'日をひきます'});}
+  if(L===1){var i=ri(0,evs.length-2),j=ri(i+1,evs.length-1),A=evs[i],B=evs[j];
+    qs.push({t:B.nm+'は、'+A.nm+'の{何|なん}日{後|あと}ですか。',a:bl('','日{後|あと}',3)});ans.push({a:(B.d-A.d)+'日{後|あと}',w:B.d+'日−'+A.d+'日'});}
+  else if(L===2){var n=pick([7,10,14]),ss=sch.filter(function(d){return d+n-1<=c.nd;});if(!ss.length)return null;var s=pick(ss);
+    qs.push({t:pick(TEN)+'は、'+mo+'月'+s+'日から'+n+'日{間|かん}あります（'+YS+'の日も{数|かぞ}えます）。{最後|さいご}の日は、{何|なん}月{何|なん}日ですか。',a:bl('','月',2)+bl('','日',2)});
+    ans.push({a:mo+'月'+(s+n-1)+'日',w:s+'日を1日{目|め}として{数|かぞ}えます'});}
+  else{var k=ri(5,8),s0=pick(open),lst=open.filter(function(d){return d>=s0;}).slice(0,k);if(lst.length<k||lst[k-1]-s0===k-1)return null;
+    qs.push({t:'そうじ{当番|とうばん}は、'+mo+'月'+s0+'日から、'+GK+'がある日だけを{数|かぞ}えて'+k+'日{間|かん}です。{最後|さいご}の日は、{何|なん}月{何|なん}日ですか。',a:bl('','月',2)+bl('','日',2)});
+    ans.push({a:mo+'月'+lst[k-1]+'日',w:dl(lst)});}
+  if(L<=2){qs.push({t:'クラブは、この月に{何回|なんかい}ありますか。',a:bl('','{回|かい}',3)});
+    ans.push({a:club.length+'{回|かい}',w:dl(club)+(L===2?'（'+dl(clubAll.filter(function(d){return club.indexOf(d)<0;}))+'は、クラブがありません）':'')});}
+  else{var e2=pick(evs),nx=e2.d+1,nxOff=nx>c.nd?null:(c.wd(nx)===0||c.wd(nx)===6||hol.indexOf(nx)>=0),sN=e2.nm+'の{次|つぎ}の日は、'+GK+'が'+YS+'だ。',e3=pick(evs),lw=c.wd(c.nd);
+    var st=statements([{T:'クラブは、この月に'+club.length+'{回|かい}ある。',F:'クラブは、この月に'+clubAll.length+'{回|かい}ある。'},
+      nxOff===null?null:(nxOff?{T:sN}:{F:sN}),
+      {T:e3.nm+'は、'+dai(e3.d)+'にある。',F:e3.nm+'は、{第|だい}'+(c.nth(e3.d)>=3?c.nth(e3.d)-1:c.nth(e3.d)+1)+YO[c.wd(e3.d)]+'にある。'},
+      {T:'この月の{最後|さいご}の日は、'+YO[lw]+'だ。',F:'この月の{最後|さいご}の日は、'+YO[(lw+1)%7]+'だ。'}]);
+    if(!st)return null;stQ(qs,ans,st,'{予定表|よていひょう}と'+OSH);}
+  return {genre:'{行事|ぎょうじ}の{予定|よてい}',lead:pick(NAMES)+'さんの'+GK+'の、'+mo+'月の'+GY+'{予定表|よていひょう}です。{予定表|よていひょう}と'+OSH+TAIL,
+    tables:[calTable(c,'【'+mo+'月の'+GY+'{予定表|よていひょう}】',lab)],notes:notes,qs:qs,ans:ans};
+}
+
+// ---- ジャンル3：ごみ出しの決まりとカレンダー ----
+var GOMI=['{燃|も}えるごみ','プラスチック','かん・びん','{紙|かみ}・ダンボール'];
+function genGomi(L){
+  var c=mkCal(),mo=c.mo,mp=pick([[1,4],[2,5]]),rest=shuffle([1,2,3,4,5].filter(function(w){return mp.indexOf(w)<0;})),pw=rest[0],kw=rest[1];
+  var DS='{出|だ}',SK='{祝日|しゅくじつ}',MAI='{毎週|まいしゅう}',hol=[],lab={};
+  function rk(d){var w=c.wd(d),n=c.nth(d);return mp.indexOf(w)>=0?0:w===pw?1:w===kw&&(n===1||n===3)?2:w===kw&&(n===2||n===4)?3:-1;}
+  function kd(d){return hol.indexOf(d)>=0?-1:rk(d);}
+  function raw(k){return c.days(function(d){return rk(d)===k;});}
+  function ok(k){return c.days(function(d){return kd(d)===k;});}
+  var h2=0,d0=0;
+  if(L>=2)hol.push(pick(raw(0)));
+  if(L===3){var ps=raw(1).filter(function(d){return d+7<=c.nd&&d>=3;});if(!ps.length)return null;h2=pick(ps);hol.push(h2);d0=h2-ri(1,2);if(hol.indexOf(d0)>=0)return null;}
+  hol.forEach(function(d){lab[d]=SK;});
+  var lim=L===1?pick([480,510,540]):pick([495,510,525]),asa='{朝|あさ}'+hm(lim);
+  var notes=['ごみは、'+asa+'までに'+DS+'します。','「{第|だい}1'+YO[kw]+'」は、その月の1{回目|かいめ}の'+YO[kw]+'のことです。'];
+  if(L>=2)notes.push(SK+'は、どのごみも{集|あつ}めません。ごみを'+DS+'せません。');
+  var qs=[],ans=[],nm=pick(NAMES);
+  var d1=pick(L===1?ok(0).concat(ok(1)):ok(2).concat(ok(3)));
+  qs.push({t:mo+'月'+d1+'日は、{何|なん}のごみを'+DS+'す日ですか。',a:bl('','',8)});ans.push({a:GOMI[kd(d1)],w:mo+'月'+d1+'日は、'+(kd(d1)>=2?'{第|だい}'+c.nth(d1):'')+YO[c.wd(d1)]});
+  var k2=L===2?0:1,l2=ok(k2),out=raw(k2).filter(function(d){return l2.indexOf(d)<0;});
+  qs.push({t:GOMI[k2]+'を'+DS+'せる日は、この月に{何回|なんかい}ありますか。',a:bl('','{回|かい}',3)});
+  ans.push({a:l2.length+'{回|かい}',w:dl(l2)+(out.length?'（'+dl(out)+'は'+SK+'なので、'+DS+'せません）':'')});
+  if(L===1){var ks=ok(2);qs.push({t:GOMI[2]+'を'+DS+'す日は、{何|なん}日と{何|なん}日ですか。',a:bl('','日と',2)+bl('','日',2)});ans.push({a:ks[0]+'日と'+ks[1]+'日',w:'{第|だい}1'+YO[kw]+'と、{第|だい}3'+YO[kw]});}
+  else if(L===2){var k3=pick([2,3]),l3=ok(k3);if(l3.length<2)return null;
+    qs.push({t:nm+'さんは、'+mo+'月'+l3[0]+'日に、'+GOMI[k3]+'を'+DS+'しわすれました。{次|つぎ}に'+GOMI[k3]+'を'+DS+'せるのは、{何|なん}月{何|なん}日ですか。',a:bl('','月',2)+bl('','日',2)});
+    ans.push({a:mo+'月'+l3[1]+'日',w:'{第|だい}'+c.nth(l3[1])+YO[kw]});}
+  else{qs.push({t:mo+'月'+d0+'日の{夜|よる}に、'+GOMI[1]+'のごみが{出|で}ました。いちばん{早|はや}く'+DS+'せるのは、{何|なん}月{何|なん}日ですか。',a:bl('','月',2)+bl('','日',2)});
+    ans.push({a:mo+'月'+(h2+7)+'日',w:h2+'日は'+SK+'なので、'+DS+'せません'});}
+  if(L===1){var cq=clockQ(lim,1);qs.push({t:'ごみを'+DS+'すのは、'+asa+'までです。<br>この'+JK+'を{表|あらわ}している{時計|とけい}を'+SEL,clocks:cq.svgs});ans.push({a:cq.ans,w:''});}
+  else if(L===2){var wk=pick([5,10,15,20]),cq2=clockQ(lim-wk,2);
+    qs.push({t:nm+'さんの{家|いえ}から、ごみ{置|お}き{場|ば}まで、{歩|ある}いて'+wk+'分かかります。'+asa+'ちょうどに{着|つ}くには、{何時|なんじ}{何|なん}分に{家|いえ}を{出|で}ればよいですか。<br>その'+JK+'を{表|あらわ}している{時計|とけい}を'+SEL,clocks:cq2.svgs});
+    ans.push({a:cq2.ans,w:asa+'の'+wk+'分{前|まえ}なので、{朝|あさ}'+hm(lim-wk)});}
+  else{var w2=ri(1,5),sec=c.days(function(d){return c.wd(d)===w2;})[1],m0=ok(0),kn=ok(2),km=ok(3);if(!kn.length||!km.length)return null;
+    var st=statements([{T:'この月、'+GOMI[0]+'を'+DS+'せる日は、'+m0.length+'{回|かい}ある。',F:'この月、'+GOMI[0]+'を'+DS+'せる日は、'+raw(0).length+'{回|かい}ある。'},
+      {T:mo+'月'+pick(kn)+'日は、'+GOMI[2]+'を'+DS+'せる。',F:mo+'月'+pick(km)+'日は、'+GOMI[2]+'を'+DS+'せる。'},
+      {F:GOMI[1]+'は、'+MAI+'2{回|かい}'+DS+'せる。'},
+      {T:'この月の{第|だい}2'+YO[w2]+'は、'+sec+'日だ。',F:'この月の{第|だい}2'+YO[w2]+'は、'+(sec+7)+'日だ。'}]);
+    if(!st)return null;stQ(qs,ans,st,'{決|き}まりとカレンダー');}
+  return {genre:'ごみ{出|だ}し',lead:nm+'さんの{町|まち}の、ごみの'+DS+'し{方|かた}の{決|き}まりと、'+mo+'月のカレンダーです。これら'+TAIL,side:true,
+    tables:[{cap:'【ごみを'+DS+'す日】',lbw:40,w:1.2,head:['ごみの{種類|しゅるい}',DS+'す日'],rows:[[GOMI[0],MAI+'　'+YO[mp[0]]+'・'+YO[mp[1]]],[GOMI[1],MAI+'　'+YO[pw]],[GOMI[2],'{第|だい}1・{第|だい}3　'+YO[kw]],[GOMI[3],'{第|だい}2・{第|だい}4　'+YO[kw]]]},
+      calTable(c,'【'+mo+'月のカレンダー】',lab,true,1)],notes:notes,qs:qs,ans:ans};
+}
+
+// ---- ジャンル4：バスの時刻表 ----
+var MID=['{市役所|しやくしょ}{前|まえ}','{図書館|としょかん}{前|まえ}','{中央|ちゅうおう}{公園|こうえん}','{病院|びょういん}{前|まえ}','{小学校|しょうがっこう}{前|まえ}'],DEST=['{動物園|どうぶつえん}','{海|うみ}の{公園|こうえん}','スポーツセンター'];
+function genJikoku(L){
+  var n=L===1?4:5,stops=['{駅前|えきまえ}'].concat(shuffle(MID).slice(0,2),[pick(DEST)]),seg=[],dep=[],i,b,TEI='バス{停|てい}',HS='{走|はし}りません',KS='{快速|かいそく}';
+  for(i=0;i<3;i++)seg.push(L===3?ri(7,19):pick(L===1?[10,15,20]:[10,15,20,25]));
+  var tot=sum(seg);if(L===1&&tot>55)return null;
+  var t=L===1?pick([480,490,500,510]):480+5*ri(0,6);for(b=0;b<n;b++){dep.push(t);t+=L===1?pick([20,30,40]):5*ri(4,7);}
+  var ex=-1,sk=0,wk=-1;
+  if(L===2)wk=ri(1,3);
+  if(L===3){ex=ri(1,3);sk=ri(1,2);wk=ex===1?pick([2,3]):ex===2?3:1;}
+  var arr=dep.map(function(d,b){var a=[d],x=d;for(var s=0;s<3;s++){x+=seg[s]-(b===ex&&(s===sk-1||s===sk)?ri(2,3):0);a.push(x);}return a;});
+  if(arr[n-1][3]>=720)return null;
+  function bn(b){return 'バス'+CN[b];}
+  function others(){var a=[];for(var b=0;b<n;b++)if(b!==ex)a.push(b);return a;}
+  var notes=[];
+  if(L>=2)notes.push(bn(wk)+'は、'+YO[6]+'と'+YO[0]+'は'+HS+'。');
+  if(L===3)notes.push('「↓」は、そのバス{停|てい}に{止|と}まらないことを{表|あらわ}します。');
+  var qs=[],ans=[],nm=pick(NAMES),b1=pick(others()),sa=0,sb=3;
+  if(L===3){sa=ri(0,2);sb=ri(sa+1,3);if(sb-sa===3)return null;}
+  if(L>=2&&Math.floor(arr[b1][sa]/60)===Math.floor(arr[b1][sb]/60))return null;
+  qs.push({t:bn(b1)+'に{乗|の}ると、'+stops[sa]+'から'+stops[sb]+'まで、かかる'+JIK+'は、'+DORE,a:bl('','',7)});
+  ans.push({a:D(arr[b1][sb]-arr[b1][sa]),w:T(arr[b1][sa])+'から'+T(arr[b1][sb])+'まで'});
+  var k=L===3?wk:ri(1,n-1),tcs=mult(dep[k-1]+5,dep[k]-5,5);if(!tcs.length)return null;var tc=pick(tcs),a2=L===3?wk+1:k;
+  qs.push({t:(L===3?YO[6]+'に、':'')+nm+'さんが'+stops[0]+'の'+TEI+'に{着|つ}いたとき、{時計|とけい}は{下|した}のようになっていました。いちばん{早|はや}く{乗|の}れるのは、どのバスですか。',a:bl('バス','',2),clocks:[clockAt(tc)],one:true});
+  ans.push({a:bn(a2),w:'{時計|とけい}は'+T(tc)+(L===3?'。'+bn(wk)+'は、'+YO[6]+'は'+HS:'')});
+  var MA='{間|ま}に{合|あ}うバスのうち、いちばんおそく{出|で}るのは、どのバスですか。',k3,lims,lm;
+  if(L===1){k3=ri(0,n-2);lims=mult(arr[k3][3],arr[k3+1][3]-5,5);if(!lims.length)return null;lm=pick(lims);
+    qs.push({t:stops[3]+'に、'+T(lm)+'までに{着|つ}きたいです。'+MA,a:bl('バス','',2)});ans.push({a:bn(k3),w:bn(k3)+'は、'+T(arr[k3][3])+'に{着|つ}きます'});}
+  else if(L===2){lims=mult(arr[wk][3],arr[wk+1][3]-5,5);if(!lims.length)return null;lm=pick(lims);
+    qs.push({t:YO[0]+'に、'+stops[3]+'に'+T(lm)+'までに{着|つ}きたいです。'+MA,a:bl('バス','',2)});ans.push({a:bn(wk-1),w:bn(wk)+'は、'+YO[0]+'は'+HS+'。'+bn(wk-1)+'は、'+T(arr[wk-1][3])+'に{着|つ}きます'});}
+  else{lims=mult(dep[ex]+sum(seg.slice(0,sk)),arr[ex+1][sk]-1,5);if(!lims.length)return null;lm=pick(lims);
+    qs.push({t:YO[1]+'に、'+stops[sk]+'に'+T(lm)+'までに{着|つ}きたいです。'+MA,a:bl('バス','',2)});ans.push({a:bn(ex-1),w:bn(ex)+'は'+KS+'で、'+stops[sk]+'に{止|と}まりません。'+bn(ex-1)+'は、'+T(arr[ex-1][sk])+'に{着|つ}きます'});}
+  if(L===1){var k4=ri(0,n-2);qs.push({t:bn(k4)+'が{出|で}たすぐ{後|あと}に、'+stops[0]+'の'+TEI+'に{着|つ}きました。{次|つぎ}のバスが{出|で}るまで、{何|なん}分ありますか。',a:bl('','分',3)});
+    ans.push({a:(dep[k4+1]-dep[k4])+'分',w:T(dep[k4])+'から'+T(dep[k4+1])+'まで'});}
+  else{var b5=pick(others()),s5=ri(1,3),g=ri(0,n-2),gp=dep[g+1]-dep[g],ZB='{全部|ぜんぶ}で',HN='{本|ほん}',SAME='どのバスも、'+stops[0]+'から'+stops[3]+'まで、{同|おな}じ'+JIK+'がかかる。',o5=pick(others());
+    var st=statements([{T:bn(b5)+'は、'+stops[s5]+'に'+T(arr[b5][s5])+'に{着|つ}く。',F:bn(b5)+'は、'+stops[s5]+'に'+T(arr[b5][s5-1])+'に{着|つ}く。'},
+      {T:YO[6]+'に{走|はし}るバスは、'+ZB+(n-1)+HN+'ある。',F:YO[6]+'に{走|はし}るバスは、'+ZB+n+HN+'ある。'},
+      {T:stops[0]+'を、'+bn(g)+'が{出|で}てから'+bn(g+1)+'が{出|で}るまでの'+JIK+'は、'+gp+'分だ。',F:stops[0]+'を、'+bn(g)+'が{出|で}てから'+bn(g+1)+'が{出|で}るまでの'+JIK+'は、'+(gp+pick([5,10]))+'分だ。'},
+      L===2?{T:SAME}:{F:SAME},
+      L===3?{T:stops[0]+'から'+stops[3]+'まで、いちばん{短|みじか}い'+JIK+'で{行|い}けるのは、'+bn(ex)+'だ。',F:stops[0]+'から'+stops[3]+'まで、いちばん{短|みじか}い'+JIK+'で{行|い}けるのは、'+bn(o5)+'だ。'}:null]);
+    if(!st)return null;stQ(qs,ans,st,'{時刻表|じこくひょう}と'+OSH);}
+  return {genre:'バスの{時刻表|じこくひょう}',lead:'{次|つぎ}の{表|ひょう}は、'+stops[0]+'から'+stops[3]+'まで{行|い}くバスの、{午前|ごぜん}の{時刻表|じこくひょう}です。{時刻表|じこくひょう}'+(notes.length?'と'+OSH:'')+TAIL,
+    tables:[{cap:'【バスの{時刻表|じこくひょう}】（{午前|ごぜん}）',lbw:38,head:[TEI].concat(dep.map(function(d,b){return bn(b)+(b===ex?'<br>（'+KS+'）':'');})),
+      rows:stops.map(function(s,i){return [s].concat(arr.map(function(a,b){return b===ex&&i===sk?'↓':hm(a[i]);}));})}],notes:notes,qs:qs,ans:ans};
+}
+
+// ---- ジャンル5：ショーの時間 ----
+var SHOWS=[
+  {pl:'{水族館|すいぞくかん}',items:[['イルカショー','{大|おお}プール','{屋内|おくない}プール'],['ペンギンのさんぽ','{中央|ちゅうおう}{広場|ひろば}','ペンギン{館|かん}'],['アシカショー','{屋外|おくがい}ステージ','{屋内|おくない}ホール'],['{魚|さかな}のえさやり','{大|だい}{水|すい}そう',null]]},
+  {pl:'{動物園|どうぶつえん}',items:[['{鳥|とり}のショー','{森|もり}のステージ','{屋内|おくない}ホール'],['ゾウのえさやり','ゾウの{広場|ひろば}','ゾウの{家|いえ}'],['ヤギのさんぽ','ふれあい{広場|ひろば}','ふれあい{館|かん}'],['{飼育員|しいくいん}さんのお{話|はなし}','{学習室|がくしゅうしつ}',null]]}];
+function genShow(L){
+  var th=pick(SHOWS),ns=L===1?3:4,st=L===1?10:5,HJ='{始|はじ}ま',OW='{終|お}わ',SAI='{最後|さいご}まで',MI='{見|み}';
+  var sh=shuffle([0,1,2,3]).slice(0,ns).sort().map(function(i){var it=th.items[i];return {nm:it[0],pl:it[1],rp:it[2],t1:pick(mult(570,690,st)),t2:pick(mult(780,930,st)),len:L===1?pick([10,20,30]):pick([15,20,25,30])};});
+  var a=ri(0,ns-1),A=sh[a],endA,i;
+  if(L===3){var x=(a+ri(1,ns-1))%ns;sh[x].t1=A.t1+A.len+5;}
+  endA=A.t1+A.len;
+  for(i=0;i<ns;i++)for(var j=i+1;j<ns;j++)if(sh[i].t1===sh[j].t1||sh[i].t2===sh[j].t2)return null;
+  var rs=sh.filter(function(s){return s.rp;}),R1=pick(rs),rule=10,KJ='{会場|かいじょう}',nm=pick(NAMES);
+  var notes=['1'+KAI+'と2'+KAI+'は、{同|おな}じ{内容|ないよう}です。','{雨|あめ}の日は、'+R1.nm+'を'+R1.rp+'で{行|おこな}います。'];
+  if(L===3)notes.push('ショーを'+MI+'るときは、'+HJ+'る'+rule+'分{前|まえ}までに'+KJ+'に{入|はい}ります。');
+  var qs=[],ans=[],s1=pick(sh),s2=pick(sh.filter(function(s){return s!==s1;}));
+  if(L===1){qs.push({t:s1.nm+'の1'+KAI+'は、{何時|なんじ}{何|なん}分に'+OW+'りますか。',a:bl('','',8)});ans.push({a:T(s1.t1+s1.len),w:T(s1.t1)+'の'+s1.len+'分{後|あと}'});}
+  else{qs.push({t:s1.nm+'の1'+KAI+'が'+HJ+'ってから、2'+KAI+'が'+HJ+'るまでの'+JIK+'は、'+DORE,a:bl('','',7)});ans.push({a:D(s1.t2-s1.t1),w:T(s1.t1)+'から'+T(s1.t2)+'まで'});}
+  var cq;
+  if(L===1){cq=clockQ(s2.t2,1);qs.push({t:s2.nm+'の2'+KAI+'が'+HJ+'る'+JK+'を{表|あらわ}している{時計|とけい}を'+SEL,clocks:cq.svgs});ans.push({a:cq.ans,w:T(s2.t2)});}
+  else if(L===2){cq=clockQ(s2.t2+s2.len,2);qs.push({t:s2.nm+'の2'+KAI+'が'+OW+'る'+JK+'を{表|あらわ}している{時計|とけい}を'+SEL,clocks:cq.svgs});ans.push({a:cq.ans,w:T(s2.t2)+'の'+s2.len+'分{後|あと}なので、'+T(s2.t2+s2.len)});}
+  else{cq=clockQ(s2.t2-rule,3);qs.push({t:s2.nm+'の2'+KAI+'を'+MI+'ます。おそくとも、{何時|なんじ}{何|なん}分までに'+KJ+'に{入|はい}りますか。<br>その'+JK+'を{表|あらわ}している{時計|とけい}を'+SEL,clocks:cq.svgs});ans.push({a:cq.ans,w:T(s2.t2)+'の'+rule+'分{前|まえ}なので、'+T(s2.t2-rule)});}
+  if(L===1){qs.push({t:'{雨|あめ}がふっています。'+R1.nm+'は、どこで{行|おこな}いますか。',a:bl('','',7)});ans.push({a:R1.rp,w:OSH+'を{見|み}ます'});}
+  else{var ss=[];sh.forEach(function(s){if(s!==A){ss.push({s:s,r:1,t:s.t1});ss.push({s:s,r:2,t:s.t2});}});
+    var need=endA+(L===3?rule:0),okS=ss.filter(function(x){return x.t>=need;}).sort(function(p,q){return p.t-q.t;});
+    if(!okS.length||(okS.length>1&&okS[0].t===okS[1].t))return null;
+    if(ss.some(function(x){return x.t===endA||x.t===need;}))return null;
+    var trap=ss.filter(function(x){return x.t>=endA&&x.t<need;});
+    qs.push({t:nm+'さんは、'+A.nm+'の1'+KAI+'を'+SAI+MI+'ました。そのあと、ほかのショーのうち、いちばん{早|はや}く'+MI+'ることができるのは、{何|なん}の{何回目|なんかいめ}ですか。',a:bl('','の',8)+bl('','{回目|かいめ}',2)});
+    ans.push({a:okS[0].s.nm+'の'+okS[0].r+KAI,w:A.nm+'は'+T(endA)+'に'+OW+'ります。'+okS[0].s.nm+'の'+okS[0].r+KAI+'は、'+T(okS[0].t)+'に'+HJ+'ります'+(trap.length?'（'+trap[0].s.nm+'は、'+rule+'分{前|まえ}までに{入|はい}れません）':'')});}
+  if(L===1){var P=sh[0],Q=sh[1];if(P.len===Q.len)return null;var lg=P.len>Q.len?P:Q;
+    qs.push({t:P.nm+'と'+Q.nm+'では、どちらのショーが、{何|なん}分{長|なが}いですか。',a:bl('','の{方|ほう}が',8)+bl('','分{長|なが}い',3)});ans.push({a:lg.nm+'の{方|ほう}が'+Math.abs(P.len-Q.len)+'分{長|なが}い',w:P.len+'分と'+Q.len+'分'});}
+  else{var pr=shuffle(sh).slice(0,2).sort(function(p,q){return p.t1-q.t1;}),f=pr[0],g=pr[1],can=g.t1-(L===3?rule:0)>=f.t1+f.len;
+    var sC=f.nm+'の1'+KAI+'を'+SAI+MI+'てから、'+g.nm+'の1'+KAI+'を、はじめから'+MI+'ることができる。';
+    var im=umax(sh.map(function(s){return s.len;})),ot=pick(sh.filter(function(s,i){return i!==im;}));
+    var at2=sh.some(function(s){return s.t2===840;}),c2=sh.filter(function(s){return s.t2>840;}).length;
+    var st2=statements([can?{T:sC}:{F:sC},
+      im<0?null:{T:JIK+'がいちばん{長|なが}いショーは、'+sh[im].nm+'だ。',F:JIK+'がいちばん{長|なが}いショーは、'+ot.nm+'だ。'},
+      at2?null:{T:'{午後|ごご}2時より{後|あと}に'+HJ+'るショーは、'+c2+'{回|かい}ある。',F:'{午後|ごご}2時より{後|あと}に'+HJ+'るショーは、'+(c2+1)+'{回|かい}ある。'},
+      {T:'{雨|あめ}の日、'+R1.nm+'は'+R1.rp+'で{行|おこな}う。',F:'{雨|あめ}の日も、'+R1.nm+'は'+R1.pl+'で{行|おこな}う。'}]);
+    if(!st2)return null;stQ(qs,ans,st2,'{表|ひょう}と'+OSH);}
+  return {genre:'ショーの'+JIK,lead:nm+'さんは、'+th.pl+'に{来|き}ました。{次|つぎ}の{表|ひょう}は、{今日|きょう}のショーの{予定|よてい}です。{表|ひょう}と'+OSH+TAIL,
+    tables:[{cap:'【ショーの{予定|よてい}】',lbw:46,cw:[null,40,40,17,null],head:['ショー','1'+KAI,'2'+KAI,JIK,'{場所|ばしょ}'],rows:sh.map(function(s){return [s.nm,T(s.t1),T(s.t2),s.len+'分',s.pl];})}],notes:notes,qs:qs,ans:ans};
+}
+
+var GENRES=[
+  {id:'kogai',name:'{校外学習|こうがいがくしゅう}',gen:genKogai},
+  {id:'gyoji',name:'{行事|ぎょうじ}の{予定|よてい}',gen:genGyoji},
+  {id:'gomi',name:'ごみ{出|だ}し',gen:genGomi},
+  {id:'jikoku',name:'バスの{時刻表|じこくひょう}',gen:genJikoku},
+  {id:'show',name:'ショーの{時間|じかん}',gen:genShow}];
+// ジャンルid・レベル(1〜3)から問題を1つ作る
+function makeProblem(id,L){
+  var g=GENRES.filter(function(x){return x.id===id;})[0];
+  for(var i=0;i<3000;i++){bad=false;var p=g.gen(L);if(p&&!bad)return p;}
+  return null;
+}
+/*GEN-END*/
+
+// ===== ここから下は画面と印刷 =====
+function R(s){return String(s).replace(/\{([^|{}]+)\|([^{}]+)\}/g,'<ruby>$1<rt>$2</rt></ruby>');}
+function $(id){return document.getElementById(id);}
+var S={genre:'any',level:2,count:1,ans:true};
+try{var sv=JSON.parse(localStorage.getItem('yoteiPrint')||'null');if(sv)for(var kk in S)if(kk in sv)S[kk]=sv[kk];}catch(e){}
+function save(){try{localStorage.setItem('yoteiPrint',JSON.stringify(S));}catch(e){}}
+
+function tableHTML(t){
+  var h='<div class="cap" data-e>'+R(t.cap)+'</div>';
+  if(t.cal){
+    h+='<table class="tb cal'+(t.plain?' plain':'')+'"><tr>'+t.head.map(function(c){return '<th>'+R(c)+'</th>';}).join('')+'</tr>';
+    t.rows.forEach(function(r){h+='<tr>'+r.map(function(c,i){
+      if(!c)return '<td class="off"></td>';
+      return '<td'+(i===0||i===6?' class="off"':'')+'><span class="dn">'+c.d+'</span>'+(c.e?'<span class="ev" data-e>'+R(c.e)+'</span>':'')+'</td>';}).join('')+'</tr>';});
+    return h+'</table>';
+  }
+  h+='<table class="tb"><colgroup>'+t.head.map(function(c,i){var w=i===0?t.lbw:(t.cw&&t.cw[i]);return '<col'+(w?' style="width:'+w+'mm"':'')+'>';}).join('')+'</colgroup><tr>'+t.head.map(function(c){return '<th data-e>'+R(c)+'</th>';}).join('')+'</tr>';
+  t.rows.forEach(function(r){h+='<tr>'+r.map(function(c,i){return i===0?'<th data-e>'+R(c)+'</th>':'<td'+(t.left?' class="l"':'')+' data-e>'+R(c)+'</td>';}).join('')+'</tr>';});
+  return h+'</table>';
+}
+function pageHTML(p,no,many){
+  var h='<div class="page"><div class="sheet"><div class="in"><div class="nm"><span class="no">'+(many?'No.'+no:'')+'</span><span class="nr"><span>'+R('{名前|なまえ}')+'</span><span class="line"></span></span></div>';
+  h+='<p class="lead" data-e>'+R(p.lead)+'</p>';
+  if(p.side)h+='<div class="tw">'+p.tables.map(function(t){return '<div style="flex:'+(t.w||1)+'">'+tableHTML(t)+'</div>';}).join('')+'</div>';
+  else h+=p.tables.map(tableHTML).join('');
+  if(p.notes&&p.notes.length)h+='<div class="note"><div class="nh">'+R(OSH)+'</div>'+p.notes.map(function(n){return '<div class="ni" data-e>・'+R(n)+'</div>';}).join('')+'</div>';
+  p.qs.forEach(function(q,i){
+    h+='<div class="q"><div class="qt" data-e>（'+(i+1)+'）'+R(q.t)+(q.a?'　<span class="bl">'+R(q.a)+'</span>':'')+'</div>';
+    if(q.opts)h+='<div class="opts'+(q.col?' col':'')+'">'+q.opts.map(function(o){return '<span data-e>（　）'+R(o)+'</span>';}).join('')+'</div>';
+    if(q.clocks)h+='<div class="clocks">'+q.clocks.map(function(g){return '<div class="g">'+g+(q.one?'':'<div>（　　）</div>')+'</div>';}).join('')+'</div>';
+    h+='</div>';});
+  return h+'</div></div></div>';
+}
+function ansHTML(p,no,many){
+  var h='<div class="page ansp"><div class="sheet"><div class="in"><h2 data-e>'+R('{答|こた}え')+(many?'（No.'+no+'）':'')+'　'+R(p.genre)+'</h2>';
+  p.ans.forEach(function(a,i){h+='<div class="al" data-e>（'+(i+1)+'）<b>'+R(a.a)+'</b>'+(a.w?'<span class="why">'+R(a.w)+'</span>':'')+'</div>';});
+  return h+'</div></div></div>';
+}
+function build(){
+  var order=shuffle(GENRES.map(function(g){return g.id;})),h='',many=S.count>1;
+  for(var i=0;i<S.count;i++){
+    var id=S.genre==='any'?order[i%order.length]:S.genre,p=makeProblem(id,S.level);
+    if(!p){say('{問題|もんだい}がうまく{作|つく}れなかったよ。もう{一度|いちど}おしてみてね。');continue;}
+    h+=pageHTML(p,i+1,many);if(S.ans)h+=ansHTML(p,i+1,many);
+  }
+  $('pages').innerHTML=h;
+  [].forEach.call($('pages').querySelectorAll('[data-e]'),function(e){e.setAttribute('contenteditable','true');});
+  layout();fitAll();
+  if(document.fonts&&document.fonts.ready)document.fonts.ready.then(fitAll);
+}
+// 1まいに収める：計算を書く空き→表の余白→カレンダーの高さ→時計→名前の下→行間 の順に少しずつちぢめる
+function fitPage(pg){
+  var sh=pg.querySelector('.sheet'),gh=30,gap=16,lh=2,cp=1.3,ch=12,chp=8.5,nm=7,n=0;
+  function set(){pg.style.setProperty('--gh',gh+'mm');pg.style.setProperty('--gap',gap+'mm');pg.style.setProperty('--lh',lh.toFixed(2));pg.style.setProperty('--cp',cp.toFixed(1)+'mm');pg.style.setProperty('--ch',ch.toFixed(1)+'mm');pg.style.setProperty('--chp',chp.toFixed(1)+'mm');pg.style.setProperty('--nm',nm+'mm');}
+  function over(){return sh.firstElementChild.offsetHeight>sh.clientHeight-4;}
+  set();
+  while(over()&&n++<160){if(gap>6)gap-=0.5;else if(cp>0.7)cp-=0.1;else if(ch>10.5){ch-=0.5;chp=Math.max(7,chp-0.5);}else if(gh>24)gh-=1;else if(nm>3)nm-=1;else if(gap>3)gap-=0.5;else if(lh>1.8)lh-=0.05;else if(gh>20)gh-=1;else if(gap>1.5)gap-=0.5;else if(lh>1.65)lh-=0.05;else break;set();}
+  var w=pg.querySelector('.warn');if(w)w.remove();
+  if(over()){w=document.createElement('div');w.className='warn noprint';w.innerHTML=R('1まいに{入|はい}りきっていないよ。{文|ぶん}を{短|みじか}くするか、{新|あたら}しい{問題|もんだい}を{作|つく}ってみてね。');pg.appendChild(w);}
+}
+function fitAll(){[].forEach.call($('pages').querySelectorAll('.page'),fitPage);layout();}
+function layout(){
+  var pv=$('pv'),sc=$('scaler'),first=$('pages').querySelector('.page');if(!first)return;
+  var pw=first.offsetWidth,avail=pv.clientWidth-16,k=Math.min(1,avail/pw);
+  sc.style.width=pw+'px';sc.style.transform='scale('+k+')';sc.style.marginLeft=Math.max(0,(avail-pw*k)/2)+'px';
+  $('pvh').style.height=(sc.offsetHeight*k)+'px';
+}
+function exportHTML(){
+  var c=$('pages').cloneNode(true);
+  [].forEach.call(c.querySelectorAll('.warn'),function(e){e.remove();});
+  [].forEach.call(c.querySelectorAll('[contenteditable]'),function(e){e.removeAttribute('contenteditable');e.removeAttribute('data-e');});
+  return '<!DOCTYPE html>\n<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=840"><title>予定と時間 プリント</title>'
+    +'<link href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&display=swap" rel="stylesheet">'
+    +'<style>'+$('pageCss').textContent+'body{margin:0;background:#ddd}.page{margin:0 auto 6mm}.bar{padding:10px;text-align:center;font-family:\'BIZ UDPGothic\',sans-serif}.bar button{font-family:inherit;font-size:18px;min-height:48px;padding:4px 24px;border-radius:8px;border:2px solid #2f7f99;background:#2f7f99;color:#fff;line-height:1.9}rt{font-size:.5em}</style></head>'
+    +'<body><div class="bar noprint"><button onclick="window.print()">'+R('{印刷|いんさつ}する')+'</button></div>'+c.innerHTML+'</body></html>';
+}
+var msgT=0;
+function say(s){$('msg').innerHTML=R(s);clearTimeout(msgT);msgT=setTimeout(function(){$('msg').innerHTML='';},6000);}
+
+// ---- 設定の部品 ----
+function group(el,opts,key){
+  el.innerHTML='';opts.forEach(function(o){var b=document.createElement('button');b.innerHTML=R(o[1]);if(S[key]===o[0])b.className='on';
+    b.addEventListener('click',function(){S[key]=o[0];save();group(el,opts,key);build();});el.appendChild(b);});
+}
+function stepper(el,key,min,max){
+  el.innerHTML='<button aria-label="へらす">▽</button><input type="number" inputmode="numeric" min="'+min+'" max="'+max+'"><button aria-label="ふやす">△</button>';
+  var inp=el.querySelector('input'),bs=el.querySelectorAll('button');inp.value=S[key];
+  function set(v){v=Math.max(min,Math.min(max,Math.round(v)||min));S[key]=v;inp.value=v;save();build();}
+  bs[0].addEventListener('click',function(){set(S[key]-1);});bs[1].addEventListener('click',function(){set(S[key]+1);});
+  inp.addEventListener('change',function(){set(+inp.value);});
+}
+[].forEach.call(document.querySelectorAll('[data-r]'),function(e){e.innerHTML=R(e.getAttribute('data-r'));});
+group($('gGenre'),[['any','おまかせ']].concat(GENRES.map(function(g){return [g.id,g.name];})),'genre');
+group($('gAns'),[[true,'つける'],[false,'つけない']],'ans');
+stepper($('sLevel'),'level',1,3);stepper($('sCount'),'count',1,10);
+$('bSet').addEventListener('click',function(){$('panel').classList.toggle('hide');layout();});
+$('bNew').addEventListener('click',function(){build();$('pv').scrollTop=0;});
+$('bPrint').addEventListener('click',function(){
+  var ae=document.activeElement;if(ae&&ae.blur)ae.blur();
+  try{window.print();}catch(e){say('{印刷|いんさつ}できなかったよ。ブラウザで{開|ひら}いてためしてね。');}
+});
+$('bCopy').addEventListener('click',function(){
+  var ta=document.createElement('textarea');ta.value=exportHTML();ta.style.position='fixed';ta.style.left='-9999px';document.body.appendChild(ta);
+  ta.focus();ta.select();ta.setSelectionRange(0,ta.value.length);var ok=false;try{ok=document.execCommand('copy');}catch(e){}
+  var html=ta.value;ta.remove();
+  if(ok){say('HTMLをコピーしたよ。');return;}
+  try{navigator.clipboard.writeText(html).then(function(){say('HTMLをコピーしたよ。');},function(){say('コピーできなかったよ。');});}catch(e){say('コピーできなかったよ。');}
+});
+$('pages').addEventListener('input',function(e){var pg=e.target.closest&&e.target.closest('.page');if(pg){fitPage(pg);layout();}});
+window.addEventListener('resize',layout);
+
+// ---- iPad向け：ズームなどの標準動作を止める ----
+document.addEventListener('gesturestart',function(e){e.preventDefault();});
+document.addEventListener('touchmove',function(e){if(e.touches.length>1)e.preventDefault();},{passive:false});
+var lastTap=0;
+document.addEventListener('touchend',function(e){
+  var now=Date.now(),t=e.target,free=t.closest&&t.closest('button,input,[contenteditable]');
+  if(!free&&now-lastTap<300)e.preventDefault();lastTap=now;
+},{passive:false});
+build();
+</script>
+</body>
+</html>
